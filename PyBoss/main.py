@@ -1,57 +1,51 @@
 # Steps
-# 1. Read csv 1 & 2 data into lists
-# 2. Iterate through the lists while simultaneously performing the formatting of data.
-# 3. Each row data is temporarily stored into a list(rec) which is added into a list of lists(recArr) 
-# 4. Open/create the csv file (finalData.csv) and write the contents of recArr into it.
+# 1. Take the input from user as which data file he/she needs to process. File list (available to process) is saved in a dictionary and stored under raw_data directory.
+# 2. Read csv data and iterate through it to create the empId, firstName, lastName, dob, ssn, state data-lists while simultaneously performing the formatting of data
+# 3. Add all the lists into a zip object.
+# 4. Write the zip object into a csv file.
 
 #import the required modules
 import csv
 import datetime
+import os
 from us_state_abbrev import * 
 
+#dictionary of input data files to provide a choice for user to process a specific file
+inpFileDict = { 1: 'employee_data1.csv', 2: 'employee_data2.csv'}
+
+#take user input to select a specific file for processing
+choice = input("Please choose a number to process the corresponding file:- " + str(inpFileDict) + " :")
+
+#setting input and output filenames
+filename=inpFileDict[int(choice)]
+
+#file paths
+inputFilePath = os.path.join("raw_data", filename)
+outFilePath = os.path.join("output", "EmpData_"+choice+".csv")
 
 #open the csv files and using csv reader method create the list objects to iterate through the data
-with open('./employee_data1.csv', 'r') as wb1:
+with open(inputFilePath, 'r') as wb1:
   reader1 = csv.reader(wb1)
   wb1_list = list(reader1)
-with open('./employee_data2.csv', 'r') as wb2:
-  reader2 = csv.reader(wb2)
-  wb2_list = list(reader2)
 
-#creating a list to store column headers.
-rec = ['Emp ID','First Name','Last Name','DOB','SSN','State']
+# #creating lists to store column data.
+empId, firstName, lastName, dob, ssn, state = [], [], [], [], [], []
 
-#create a recArr for all rows (both CSVs)
-recArr = [[] for x in range(len(wb1_list) + len(wb2_list) - 1)]
-
-#setting first list as value of column headers
-recArr[0] = rec
-#resetting the list(rec) to reuse the same
-rec = []
-
-#iterating through the first csv data list[wb1_list] and saving the row data(formatted) into a temp list(rec) to add it into list of lists(recArr)
+#iterating through the csv data list and saving the column data into individual lists
 for j in range(1,len(wb1_list)):
-    rec.append(wb1_list[j][0])
-    rec.append(wb1_list[j][1].split(' ',1)[0])
-    rec.append(wb1_list[j][1].split(' ',1)[1])
-    rec.append(datetime.datetime.strptime(wb1_list[j][2], '%Y-%m-%d').strftime('%d/%m/%Y'))
-    rec.append(wb1_list[j][3].replace((wb1_list[j][3])[:6],'***-**'))
-    rec.append(us_state_abbrev.get(wb1_list[j][4]))
-    recArr[j] = rec
-    rec = []
+    empId.append(wb1_list[j][0])
+    firstName.append(wb1_list[j][1].split(' ',1)[0])
+    lastName.append(wb1_list[j][1].split(' ',1)[1])
+    dob.append(datetime.datetime.strptime(wb1_list[j][2], '%Y-%m-%d').strftime('%d/%m/%Y'))
+    ssn.append(wb1_list[j][3].replace((wb1_list[j][3])[:6],'***-**'))
+    state.append(us_state_abbrev.get(wb1_list[j][4]))
 
-#iterating through the second csv data list[wb2_list] and saving the row data(formatted) into a temp list(rec) to add it into list of lists(recArr)
-for k in range(1,len(wb2_list)):
-    rec.append(wb2_list[k][0])
-    rec.append(wb2_list[k][1].split(' ',1)[0])
-    rec.append(wb2_list[k][1].split(' ',1)[1])
-    rec.append(datetime.datetime.strptime(wb2_list[k][2], '%Y-%m-%d').strftime('%d/%m/%Y'))
-    rec.append(wb2_list[k][3].replace((wb2_list[k][3])[:6],'***-**'))
-    rec.append(us_state_abbrev.get(wb2_list[k][4]))
-    recArr[len(wb1_list)+k-1] = rec
-    rec = []
+#adding the lists into a zipped object
+csvout = zip(empId,firstName,lastName,dob,ssn,state)
 
-#open a new csv file(finalData.csv) to write the data from the list of lists(recArr)
-with open("./finalData.csv", "w", newline="") as f:
+#writing to a csv using the zipped object
+with open(outFilePath, "w", newline="") as f:
     writer = csv.writer(f)
-    writer.writerows(recArr)
+    # Write the header row
+    writer.writerow(['Emp ID','First Name','Last Name','DOB','SSN','State'])
+    writer.writerows(csvout)
