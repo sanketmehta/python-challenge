@@ -27,16 +27,27 @@ inputFilePath = os.path.join("raw_data", filename)
 with open(inputFilePath, "r") as f:
   txtData = f.read()
 
-#perform the paragraph analysis by using the regex method findall to calculate required values & print the analysis
+#using regex method findall and regex pattern finding the required values
+totLt = len(re.findall(r'.', txtData))
+nonSpLt = len(re.findall('[^ ]', txtData))
+wrdCt = len(re.findall(r'\w+', txtData))
+
+# 'Sentence ending with . ? or ! and followed by space " or newline' +
+# 'Using EOL character to match the last line as the last . is not followed by space or newline' -
+# 'Ignore the . which comes in an abbreviated name format'
+senCt = len(re.findall(r'[\.\?\!][\s\"\\n]', txtData)) + len(re.findall(r'$', txtData)) - len(re.findall(r'[\s][A-Z][\.]', txtData))
+avgLtCt = round((nonSpLt / wrdCt),11)
+avgStLn = round((wrdCt / senCt),1)
+
+
 print("")
 print("------------------")
 print("Paragraph Analysis")
 print("------------------")
-print("Approximate Total Charater Count: ", len(re.findall(r'.', txtData)))
-print("Approximate Non Space-Charater Count: ", len(re.findall('[^ ]', txtData)))
-print("Approximate Word Count: ", len(re.findall(r'\w+', txtData)))
-#sentences can end with a '.', '?' or '!', hence counting instances of each of these
-print("Approximate Sentence Count: ", len(re.findall(r'[\.\?\!]', txtData)))
-print("Average Letter Count (Letters/Word): ", round(len(re.findall('[^ ]', txtData))/len(re.findall(r'\w+', txtData)),11))
-print("Average Sentence Length (Words/Sentence): ", round(len(re.findall(r'\w+', txtData))/len(re.findall(r'[\.\?\!]', txtData)),1))
+print("Approximate Total Charater Count: ", totLt)
+print("Approximate Non Space-Charater Count: ", nonSpLt)
+print("Approximate Word Count: ", wrdCt)
+print("Approximate Sentence Count: ", senCt)
+print("Average Letter Count (Letters/Word): ", avgLtCt)
+print("Average Sentence Length (Words/Sentence): ", avgStLn)
 print("------------------")
